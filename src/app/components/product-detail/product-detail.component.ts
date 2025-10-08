@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -11,6 +11,8 @@ import { MatListModule } from '@angular/material/list';
 
 import { EcommerceService, Articulo } from '../../services/ecommerce.service';
 import { CartService } from '../../services/cart.service';
+import { AuthService } from '../../services/auth.service';
+import { QuantitySelectorComponent } from './quantity-selector.component';
 
 @Component({
   selector: 'app-product-detail',
@@ -23,12 +25,13 @@ import { CartService } from '../../services/cart.service';
     MatBadgeModule,
     MatChipsModule,
     MatDividerModule,
-    MatListModule
+    MatListModule,
+    QuantitySelectorComponent
   ],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.css'
 })
-export class ProductDetailComponent implements OnInit {
+export class ProductDetailComponent implements OnInit, OnDestroy {
   articulo: Articulo | null = null;
   articulosRelacionados: Articulo[] = [];
   isLoading: boolean = false;
@@ -37,8 +40,11 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private ecommerceService: EcommerceService,
-    public cartService: CartService
+    public cartService: CartService,
+    private authService: AuthService
   ) {}
+
+  selectedQuantity: number = 1;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -79,18 +85,51 @@ export class ProductDetailComponent implements OnInit {
 
   agregarAlCarrito(): void {
     if (this.articulo) {
-      this.cartService.add(this.articulo, 1);
+      this.cartService.add(this.articulo, this.selectedQuantity);
     }
   }
 
   comprarAhora(): void {
     if (this.articulo) {
-      if (this.canAdd(this.articulo)) {
+      if (this.canAddToCart()) {
         this.agregarAlCarrito();
       }
       // Aquí se debería redirigir al checkout
       alert('¡Redirigiendo al checkout!');
     }
+  }
+
+  onQuantityChange(quantity: number): void {
+    this.selectedQuantity = quantity;
+  }
+
+  isWorkshopUser(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user ? user.taller : false;
+  }
+
+  getDisplayPrice(): number {
+    if (!this.articulo) return 0;
+    return this.isWorkshopUser() ? this.articulo.precioTaller : this.articulo.precioUsuario;
+  }
+
+  getPriceClass(): string {
+    return this.isWorkshopUser() ? 'workshop-price' : 'user-price';
+  }
+
+  getStockIcon(): string {
+    if (!this.articulo) return 'report_problem';
+    if (this.articulo.stock <= 0) return 'report_problem';
+    if (this.articulo.stock <= 5) return 'warning';
+    return 'inventory';
+  }
+
+  canAddToCart(): boolean {
+    if (!this.articulo) return false;
+    if (!this.articulo.activo) return false;
+    if (this.articulo.stock <= 0) return false;
+    const current = this.cartService.getQuantity(this.articulo.id);
+    return (current + this.selectedQuantity) <= this.articulo.stock;
   }
 
   verArticuloRelacionado(articulo: Articulo): void {
@@ -113,6 +152,7 @@ export class ProductDetailComponent implements OnInit {
 
   getStockStatus(): string {
     if (!this.articulo) return '';
+    if (!this.articulo.activo) return 'Producto no disponible';
     if (this.articulo.stock <= 0) {
       return 'Sin stock';
     } else if (this.articulo.stock <= 5) {
@@ -124,6 +164,7 @@ export class ProductDetailComponent implements OnInit {
 
   getStockClass(): string {
     if (!this.articulo) return '';
+    if (!this.articulo.activo) return 'product-unavailable';
     if (this.articulo.stock <= 0) {
       return 'out-of-stock';
     } else if (this.articulo.stock <= 5) {
@@ -134,9 +175,15 @@ export class ProductDetailComponent implements OnInit {
   }
 
   canAdd(a: Articulo): boolean {
-    if (!a) return false;
-    if (a.stock <= 0) return false;
-    const current = this.cartService.getQuantity(a.id);
-    return current < a.stock;
+    return this.canAddToCart();
+  }
+
+  // Manejo de errores de imagen
+  onImageError(event: any): void {
+    event.target.src = '/assets/images/no-image.svg';
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup if needed
   }
 }

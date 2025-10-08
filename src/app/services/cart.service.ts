@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Articulo } from './ecommerce.service';
+import { AuthService } from './auth.service';
 
 export interface CartItem {
   articulo: Articulo;
@@ -14,7 +15,7 @@ export class CartService {
   private items: CartItem[] = [];
   private items$ = new BehaviorSubject<CartItem[]>([]);
 
-  constructor() {
+  constructor(private authService: AuthService) {
     this.load();
   }
 
@@ -48,7 +49,11 @@ export class CartService {
   }
 
   getTotal(): number {
-    return this.items.reduce((acc, it) => acc + it.articulo.precioUsuario * it.quantity, 0);
+    return this.items.reduce((acc, it) => {
+      const user = this.authService.getCurrentUser();
+      const price = user && user.taller ? it.articulo.precioTaller : it.articulo.precioUsuario;
+      return acc + (price * it.quantity);
+    }, 0);
   }
 
   getQuantity(articuloId: number): number {

@@ -1,0 +1,43 @@
+<div class="quantity-selector">
+  <label class="quantity-label">Cantidad:</label>
+  <div class="quantity-controls">
+    <button
+      mat-icon-button
+      type="button"
+      class="quantity-btn decrease-btn"
+      (click)="decreaseQuantity()"
+      [disabled]="quantity <= 1"
+      aria-label="Disminuir cantidad">
+      <mat-icon>remove</mat-icon>
+    </button>
+
+    <input
+      type="number"
+      class="quantity-input"
+      [value]="quantity"
+      (input)="onQuantityInput($event)"
+      [min]="1"
+      [max]="maxQuantity"
+      readonly
+      aria-label="Cantidad del producto">
+
+    <button
+      mat-icon-button
+      type="button"
+      class="quantity-btn increase-btn"
+      (click)="increaseQuantity()"
+      [disabled]="quantity >= maxQuantity"
+      aria-label="Aumentar cantidad">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+
+  <div class="quantity-info">
+    <span class="stock-info" *ngIf="maxQuantity > 0">
+      {{ maxQuantity }} disponibles
+    </span>
+    <span class="stock-warning" *ngIf="maxQuantity <= 5 && maxQuantity > 0">
+      ¡Últimas unidades!
+    </span>
+  </div>
+</div>

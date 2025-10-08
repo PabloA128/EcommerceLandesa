@@ -8,101 +8,127 @@
 
   <div class="product-content">
     <!-- Imagen principal -->
-    <div class="product-image">
-      <img [src]="articulo.imagen || '/assets/images/no-image.svg'"
-           [alt]="articulo.nombre"
-           class="main-image">
+    <div class="product-image-section">
+      <div class="image-container">
+        <img [src]="articulo.imagen || '/assets/images/no-image.svg'"
+             [alt]="articulo.nombre"
+             (error)="onImageError($event)"
+             class="main-image">
+        <div class="image-overlay" *ngIf="!articulo.activo">
+          <span class="out-of-stock-badge">Producto no disponible</span>
+        </div>
+      </div>
     </div>
 
     <!-- Información del producto -->
-    <div class="product-info">
-      <div class="product-header">
+    <div class="product-info-section">
+      <div class="product-header-section">
         <h1 class="product-title">{{ articulo.nombre }}</h1>
-        <p class="product-code">Código: {{ articulo.codigoArticulo }}</p>
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <div class="product-details">
-        <div class="price-section">
-          <div class="price-info">
-            <span class="price-label">Precio usuario:</span>
-            <span class="user-price">${{ articulo.precioUsuario | number:'1.2-2' }}</span>
+        <div class="product-meta">
+          <span class="product-code">Código: {{ articulo.codigoArticulo }}</span>
+          <div class="product-badges">
+            <mat-chip-listbox>
+              <mat-chip (click)="goToCategoria(articulo.categoriaId)">
+                {{ articulo.categoriaNombre }}
+              </mat-chip>
+              <mat-chip *ngIf="articulo.subcategoriaNombre" (click)="goToSubcategoria(articulo.subcategoriaId)">
+                {{ articulo.subcategoriaNombre }}
+              </mat-chip>
+            </mat-chip-listbox>
           </div>
-
-          <div class="price-info" *ngIf="articulo.precioTaller !== articulo.precioUsuario">
-            <span class="price-label">Precio taller:</span>
-            <span class="workshop-price">${{ articulo.precioTaller | number:'1.2-2' }}</span>
-          </div>
-        </div>
-
-        <div class="stock-info" [ngClass]="getStockClass()">
-          <mat-icon>{{ articulo.stock > 0 ? 'inventory' : 'report_problem' }}</mat-icon>
-          <span>{{ getStockStatus() }}</span>
-          <span *ngIf="articulo.stock > 0">({{ articulo.stock }} disponibles)</span>
-        </div>
-
-        <div class="category-info">
-          <mat-chip-listbox>
-            <mat-chip (click)="goToCategoria(articulo.categoriaId)">
-              {{ articulo.categoriaNombre }}
-            </mat-chip>
-            <mat-chip *ngIf="articulo.subcategoriaNombre" (click)="goToSubcategoria(articulo.subcategoriaId)">
-              {{ articulo.subcategoriaNombre }}
-            </mat-chip>
-          </mat-chip-listbox>
         </div>
       </div>
 
-      <mat-divider></mat-divider>
+      <mat-divider class="section-divider"></mat-divider>
+
+      <div class="product-details-section">
+        <!-- Precio -->
+        <div class="price-display-section">
+          <div class="price-main">
+            <span class="price-label">Precio</span>
+            <span class="price-value" [ngClass]="getPriceClass()">
+              ${{ getDisplayPrice() | number:'1.2-2' }}
+            </span>
+            <span class="price-per-unit">/unidad</span>
+          </div>
+          <div class="price-note" *ngIf="isWorkshopUser() && articulo.precioTaller !== articulo.precioUsuario">
+            <mat-icon>info</mat-icon>
+            Precio especial para talleres
+          </div>
+        </div>
+
+        <!-- Stock -->
+        <div class="stock-display" [ngClass]="getStockClass()">
+          <mat-icon>{{ getStockIcon() }}</mat-icon>
+          <div class="stock-info">
+            <span class="stock-status">{{ getStockStatus() }}</span>
+            <span class="stock-quantity" *ngIf="articulo.stock > 0">
+              ({{ articulo.stock }} disponibles)
+            </span>
+          </div>
+        </div>
+
+        <!-- Selector de cantidad (solo si hay stock) -->
+        <div class="quantity-section" *ngIf="articulo.stock > 0">
+          <app-quantity-selector
+            [maxQuantity]="articulo.stock"
+            [initialQuantity]="selectedQuantity"
+            (quantityChange)="onQuantityChange($event)">
+          </app-quantity-selector>
+        </div>
+      </div>
+
+      <mat-divider class="section-divider"></mat-divider>
 
       <!-- Descripción -->
       <div class="description-section" *ngIf="articulo.descripcion">
-        <h3>Descripción</h3>
+        <h3 class="section-title">Descripción del producto</h3>
         <p class="product-description">{{ articulo.descripcion }}</p>
       </div>
 
       <!-- Características técnicas -->
       <div class="specs-section">
-        <h3>Características</h3>
-        <mat-list>
-          <mat-list-item>
+        <h3 class="section-title">Características técnicas</h3>
+        <div class="specs-grid">
+          <div class="spec-item">
             <span class="spec-label">Código de artículo:</span>
             <span class="spec-value">{{ articulo.codigoArticulo }}</span>
-          </mat-list-item>
-          <mat-list-item>
+          </div>
+          <div class="spec-item">
             <span class="spec-label">Categoría:</span>
             <span class="spec-value">{{ articulo.categoriaNombre }}</span>
-          </mat-list-item>
-          <mat-list-item *ngIf="articulo.subcategoriaNombre">
+          </div>
+          <div class="spec-item" *ngIf="articulo.subcategoriaNombre">
             <span class="spec-label">Subcategoría:</span>
             <span class="spec-value">{{ articulo.subcategoriaNombre }}</span>
-          </mat-list-item>
-          <mat-list-item>
+          </div>
+          <div class="spec-item">
             <span class="spec-label">Stock disponible:</span>
             <span class="spec-value">{{ articulo.stock }}</span>
-          </mat-list-item>
-          <mat-list-item *ngIf="articulo.tallerIds.length > 0">
+          </div>
+          <div class="spec-item" *ngIf="articulo.tallerIds.length > 0">
             <span class="spec-label">Talleres asociados:</span>
             <span class="spec-value">{{ articulo.tallerIds.length }} taller(es)</span>
-          </mat-list-item>
-        </mat-list>
+          </div>
+        </div>
       </div>
 
       <!-- Botones de acción -->
-      <div class="action-buttons">
-        <button mat-raised-button color="primary"
+      <div class="action-buttons-section">
+        <button mat-raised-button
+                color="primary"
+                class="action-button primary-action"
                 (click)="agregarAlCarrito()"
-                [disabled]="!canAdd(articulo)"
-                class="action-button">
+                [disabled]="!canAddToCart()">
           <mat-icon>add_shopping_cart</mat-icon>
           Agregar al carrito
         </button>
 
-        <button mat-raised-button color="accent"
+        <button mat-raised-button
+                color="accent"
+                class="action-button secondary-action"
                 (click)="comprarAhora()"
-                [disabled]="!canAdd(articulo)"
-                class="action-button">
+                [disabled]="!canAddToCart()">
           <mat-icon>shopping_bag</mat-icon>
           Comprar ahora
         </button>

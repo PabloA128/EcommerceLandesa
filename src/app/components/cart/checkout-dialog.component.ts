@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 export interface CheckoutDialogData {
   total: number;
@@ -27,7 +27,8 @@ export interface CheckoutDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatCardModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './checkout-dialog.component.html',
   styleUrls: ['./checkout-dialog.component.css']
@@ -53,22 +54,44 @@ export class CheckoutDialogComponent {
   onSubmit(): void {
     if (this.checkoutForm.valid) {
       this.isProcessing = true;
-      
-      // Simular procesamiento
+
+      // Simular procesamiento de pago
       setTimeout(() => {
         this.isProcessing = false;
-        this.snackBar.open('✅ ¡Pedido confirmado! Recibirás un email con los detalles.', 'Cerrar', {
-          duration: 5000,
+
+        // Mostrar mensaje de éxito con más detalles
+        this.snackBar.open('✅ ¡Pedido confirmado exitosamente! Recibirás un email con los detalles de tu compra y el número de seguimiento.', 'Cerrar', {
+          duration: 6000,
           horizontalPosition: 'right',
           verticalPosition: 'top',
           panelClass: ['success-snackbar']
         });
-        this.dialogRef.close(true);
-      }, 2000);
+
+        // Cerrar modal con resultado exitoso
+        this.dialogRef.close({
+          success: true,
+          orderData: this.checkoutForm.value,
+          total: this.data.total * 1.16 // Total con impuestos
+        });
+      }, 2500);
+    } else {
+      // Marcar campos como touched para mostrar errores
+      Object.keys(this.checkoutForm.controls).forEach(key => {
+        this.checkoutForm.get(key)?.markAsTouched();
+      });
+
+      this.snackBar.open('⚠️ Por favor completa todos los campos requeridos correctamente.', 'Cerrar', {
+        duration: 4000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['warning-snackbar']
+      });
     }
   }
 
   onCancel(): void {
-    this.dialogRef.close(false);
+    if (!this.isProcessing) {
+      this.dialogRef.close(false);
+    }
   }
 }

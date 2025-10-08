@@ -1,60 +1,123 @@
 <!-- profile.component.html -->
 <div class="profile-container">
   <mat-card class="profile-card">
-    <mat-card-header>
+    <mat-card-header class="profile-header">
       <div mat-card-avatar class="profile-avatar">
         <mat-icon>person</mat-icon>
       </div>
-      <mat-card-title>Editar Perfil</mat-card-title>
-      <mat-card-subtitle>Actualiza tus datos personales</mat-card-subtitle>
+      <mat-card-title>Mi Perfil</mat-card-title>
+      <mat-card-subtitle>Información de tu cuenta</mat-card-subtitle>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="goToEcommerce()" class="back-button">
+          <mat-icon>store</mat-icon>
+          Volver a Tienda
+        </button>
+      </div>
     </mat-card-header>
 
     <mat-card-content>
+      <!-- Información del usuario -->
+      <div class="user-info-section">
+        <div class="info-item">
+          <mat-icon>person</mat-icon>
+          <div class="info-content">
+            <span class="info-label">Nombre</span>
+            <span class="info-value">{{ getCurrentUserName() }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>email</mat-icon>
+          <div class="info-content">
+            <span class="info-label">Correo Electrónico</span>
+            <span class="info-value">{{ getCurrentUserEmail() }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>business</mat-icon>
+          <div class="info-content">
+            <span class="info-label">Tipo de Cuenta</span>
+            <span class="info-value" [class.workshop-account]="isWorkshopUser()">
+              {{ isWorkshopUser() ? 'Cuenta de Taller' : 'Cuenta de Cliente' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- Formulario de edición -->
       <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nombre</mat-label>
-          <input matInput formControlName="nombre" placeholder="Tu nombre completo">
-          <mat-error *ngIf="profileForm.get('nombre')?.invalid">Nombre requerido</mat-error>
-        </mat-form-field>
+        <div class="form-section">
+          <h3>Editar Información</h3>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="tuemail@ejemplo.com">
-          <mat-error *ngIf="profileForm.get('email')?.invalid">Email inválido</mat-error>
-        </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="nombre" placeholder="Tu nombre completo">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="profileForm.get('nombre')?.invalid">Nombre requerido</mat-error>
+            </mat-form-field>
+          </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Contraseña Actual</mat-label>
-          <input matInput formControlName="currentPassword" type="password">
-          <mat-error *ngIf="profileForm.get('currentPassword')?.invalid">Contraseña requerida</mat-error>
-        </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email" placeholder="tuemail@ejemplo.com">
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="profileForm.get('email')?.invalid">Email inválido</mat-error>
+            </mat-form-field>
+          </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nueva Contraseña</mat-label>
-          <input matInput formControlName="newPassword" type="password">
-        </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Contraseña Actual</mat-label>
+              <input matInput formControlName="currentPassword" type="password">
+              <mat-icon matSuffix>lock</mat-icon>
+              <mat-error *ngIf="profileForm.get('currentPassword')?.invalid">Contraseña requerida</mat-error>
+            </mat-form-field>
+          </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Confirmar Nueva Contraseña</mat-label>
-          <input matInput formControlName="confirmPassword" type="password">
-          <mat-error *ngIf="profileForm.get('confirmPassword')?.invalid">Las contraseñas no coinciden</mat-error>
-        </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nueva Contraseña</mat-label>
+              <input matInput formControlName="newPassword" type="password">
+              <mat-icon matSuffix>lock</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Confirmar Nueva Contraseña</mat-label>
+              <input matInput formControlName="confirmPassword" type="password">
+              <mat-icon matSuffix>lock</mat-icon>
+              <mat-error *ngIf="profileForm.get('confirmPassword')?.invalid">Las contraseñas no coinciden</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
       </form>
     </mat-card-content>
 
-    <mat-card-actions>
-      <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="profileForm.invalid || isLoading">
+    <mat-card-actions class="card-actions">
+      <button mat-raised-button color="primary" (click)="onSubmit()"
+              [disabled]="profileForm.invalid || isLoading" class="save-button">
         <mat-icon *ngIf="isLoading">refresh</mat-icon>
+        <mat-icon *ngIf="!isLoading">save</mat-icon>
         Guardar Cambios
       </button>
-      <button mat-button (click)="cancel()">Cancelar</button>
+      <button mat-stroked-button (click)="goToEcommerce()" class="cancel-button">
+        <mat-icon>arrow_back</mat-icon>
+        Volver a Tienda
+      </button>
     </mat-card-actions>
 
-    <div *ngIf="successMessage" class="success-message">
+    <!-- Mensajes de estado -->
+    <div *ngIf="successMessage" class="status-message success-message">
       <mat-icon>check_circle</mat-icon>
       {{ successMessage }}
     </div>
-    <div *ngIf="errorMessage" class="error-message">
+    <div *ngIf="errorMessage" class="status-message error-message">
       <mat-icon>error</mat-icon>
       {{ errorMessage }}
     </div>

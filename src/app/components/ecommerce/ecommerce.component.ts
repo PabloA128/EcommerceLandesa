@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -19,6 +19,7 @@ import { FormsModule } from '@angular/forms';
 
 import { EcommerceService, Categoria, Subcategoria, Articulo, BusquedaRequest } from '../../services/ecommerce.service';
 import { CartService } from '../../services/cart.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-ecommerce',
@@ -44,7 +45,7 @@ import { CartService } from '../../services/cart.service';
   templateUrl: './ecommerce.component.html',
   styleUrls: ['./ecommerce.component.css']
 })
-export class EcommerceComponent implements OnInit {
+export class EcommerceComponent implements OnInit, OnDestroy {
   categorias: Categoria[] = [];
   subcategorias: Subcategoria[] = [];
   articulos: Articulo[] = [];
@@ -66,7 +67,8 @@ export class EcommerceComponent implements OnInit {
     private ecommerceService: EcommerceService,
     private router: Router,
     public cartService: CartService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -249,6 +251,16 @@ export class EcommerceComponent implements OnInit {
   }
 
   onImageError(event: any): void {
-    event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik04MCA2MEgxMjBWMTQwSDgwVjYwWiIgZmlsbD0iI0NDQ0NDQyIvPgo8cGF0aCBkPSJNODAgNjBMMTIwIDEwMEw4MCAxNDBWNjBaIiBmaWxsPSIjRUVFRUVFIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5OTk5IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPkltYWdlbiBubyBlbmNvbnRyYWRhPC90ZXh0Pgo8L3N2Zz4K';
+    event.target.src = '/assets/images/no-image.svg';
+  }
+
+  // Método para obtener el precio correcto según el tipo de usuario
+  getDisplayPrice(articulo: Articulo): number {
+    const user = this.authService.getCurrentUser();
+    return user && user.taller ? articulo.precioTaller : articulo.precioUsuario;
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup if needed
   }
 }

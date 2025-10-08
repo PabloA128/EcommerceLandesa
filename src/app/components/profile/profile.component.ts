@@ -7,7 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -20,6 +22,9 @@ import { AuthService } from '../../services/auth.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    MatToolbarModule,
+    MatDividerModule,
+    MatSnackBarModule,
     ReactiveFormsModule
   ],
   templateUrl: './profile.component.html',
@@ -47,7 +52,6 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Cargar datos actuales del usuario
     const currentUser = this.authService.getCurrentUser();
     if (currentUser) {
       this.profileForm.patchValue({
@@ -70,7 +74,6 @@ export class ProfileComponent implements OnInit {
     this.isLoading = true;
     const formValue = this.profileForm.value;
 
-    // Llamar al servicio para actualizar datos
     this.authService.updateProfile(formValue).subscribe({
       next: () => {
         this.isLoading = false;
@@ -86,6 +89,25 @@ export class ProfileComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/ecommerce']);
+  }
+
+  goToEcommerce(): void {
+    this.router.navigate(['/ecommerce']);
+  }
+
+  getCurrentUserName(): string {
+    const user = this.authService.getCurrentUser();
+    return user ? user.nombre : 'Usuario';
+  }
+
+  getCurrentUserEmail(): string {
+    const user = this.authService.getCurrentUser();
+    return user ? user.mail : '';
+  }
+
+  isWorkshopUser(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user ? user.taller : false;
   }
 }

@@ -153,10 +153,7 @@
               <p class="product-code">Código: {{ articulo.codigoArticulo }}</p>
 
               <div class="price-info">
-                <span class="user-price">${{ articulo.precioUsuario | number:'1.2-2' }}</span>
-                <span class="workshop-price" *ngIf="articulo.precioTaller !== articulo.precioUsuario">
-                  Taller: ${{ articulo.precioTaller | number:'1.2-2' }}
-                </span>
+                <span class="current-price">${{ getDisplayPrice(articulo) | number:'1.2-2' }}</span>
               </div>
 
               <div class="stock-info" [class.low-stock]="articulo.stock > 0 && articulo.stock <= 5">
