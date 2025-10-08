@@ -1,0 +1,67 @@
+<div class="checkout-container">
+  <div class="checkout-header">
+    <mat-icon class="checkout-icon">shopping_bag</mat-icon>
+    <h2>Finalizar Compra</h2>
+  </div>
+  
+  <div class="checkout-summary">
+    <div class="summary-row">
+      <span>Artículos ({{ data.itemCount }})</span>
+      <span>${{ data.total | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-row total">
+      <span>Total</span>
+      <strong>${{ data.total | number:'1.2-2' }}</strong>
+    </div>
+  </div>
+  
+  <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()" class="checkout-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="fullName" placeholder="Tu nombre completo">
+      <mat-icon matSuffix>person</mat-icon>
+      <mat-error *ngIf="checkoutForm.get('fullName')?.invalid && checkoutForm.get('fullName')?.touched">
+        Nombre requerido
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" placeholder="tu@email.com">
+      <mat-icon matSuffix>email</mat-icon>
+      <mat-error *ngIf="checkoutForm.get('email')?.invalid && checkoutForm.get('email')?.touched">
+        Email inválido
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phone" placeholder="+1234567890">
+      <mat-icon matSuffix>phone</mat-icon>
+      <mat-error *ngIf="checkoutForm.get('phone')?.invalid && checkoutForm.get('phone')?.touched">
+        Teléfono requerido
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dirección</mat-label>
+      <input matInput formControlName="address" placeholder="Tu dirección completa">
+      <mat-icon matSuffix>location_on</mat-icon>
+      <mat-error *ngIf="checkoutForm.get('address')?.invalid && checkoutForm.get('address')?.touched">
+        Dirección requerida
+      </mat-error>
+    </mat-form-field>
+  </form>
+  
+  <div class="checkout-actions">
+    <button mat-button (click)="onCancel()" class="cancel-btn">
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" 
+            [disabled]="checkoutForm.invalid || isProcessing" class="confirm-btn">
+      <mat-spinner *ngIf="isProcessing" diameter="20" class="spinner"></mat-spinner>
+      <mat-icon *ngIf="!isProcessing">payment</mat-icon>
+      {{ isProcessing ? 'Procesando...' : 'Confirmar Pedido' }}
+    </button>
+  </div>
+</div>

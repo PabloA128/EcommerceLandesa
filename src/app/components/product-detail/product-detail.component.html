@@ -1,0 +1,146 @@
+<div class="product-detail-container" *ngIf="!isLoading && articulo">
+  <div class="back-button">
+    <button mat-button (click)="volverALista()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver a la tienda
+    </button>
+  </div>
+
+  <div class="product-content">
+    <!-- Imagen principal -->
+    <div class="product-image">
+      <img [src]="articulo.imagen || '/assets/images/no-image.svg'"
+           [alt]="articulo.nombre"
+           class="main-image">
+    </div>
+
+    <!-- Información del producto -->
+    <div class="product-info">
+      <div class="product-header">
+        <h1 class="product-title">{{ articulo.nombre }}</h1>
+        <p class="product-code">Código: {{ articulo.codigoArticulo }}</p>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="product-details">
+        <div class="price-section">
+          <div class="price-info">
+            <span class="price-label">Precio usuario:</span>
+            <span class="user-price">${{ articulo.precioUsuario | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="price-info" *ngIf="articulo.precioTaller !== articulo.precioUsuario">
+            <span class="price-label">Precio taller:</span>
+            <span class="workshop-price">${{ articulo.precioTaller | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="stock-info" [ngClass]="getStockClass()">
+          <mat-icon>{{ articulo.stock > 0 ? 'inventory' : 'report_problem' }}</mat-icon>
+          <span>{{ getStockStatus() }}</span>
+          <span *ngIf="articulo.stock > 0">({{ articulo.stock }} disponibles)</span>
+        </div>
+
+        <div class="category-info">
+          <mat-chip-listbox>
+            <mat-chip (click)="goToCategoria(articulo.categoriaId)">
+              {{ articulo.categoriaNombre }}
+            </mat-chip>
+            <mat-chip *ngIf="articulo.subcategoriaNombre" (click)="goToSubcategoria(articulo.subcategoriaId)">
+              {{ articulo.subcategoriaNombre }}
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Descripción -->
+      <div class="description-section" *ngIf="articulo.descripcion">
+        <h3>Descripción</h3>
+        <p class="product-description">{{ articulo.descripcion }}</p>
+      </div>
+
+      <!-- Características técnicas -->
+      <div class="specs-section">
+        <h3>Características</h3>
+        <mat-list>
+          <mat-list-item>
+            <span class="spec-label">Código de artículo:</span>
+            <span class="spec-value">{{ articulo.codigoArticulo }}</span>
+          </mat-list-item>
+          <mat-list-item>
+            <span class="spec-label">Categoría:</span>
+            <span class="spec-value">{{ articulo.categoriaNombre }}</span>
+          </mat-list-item>
+          <mat-list-item *ngIf="articulo.subcategoriaNombre">
+            <span class="spec-label">Subcategoría:</span>
+            <span class="spec-value">{{ articulo.subcategoriaNombre }}</span>
+          </mat-list-item>
+          <mat-list-item>
+            <span class="spec-label">Stock disponible:</span>
+            <span class="spec-value">{{ articulo.stock }}</span>
+          </mat-list-item>
+          <mat-list-item *ngIf="articulo.tallerIds.length > 0">
+            <span class="spec-label">Talleres asociados:</span>
+            <span class="spec-value">{{ articulo.tallerIds.length }} taller(es)</span>
+          </mat-list-item>
+        </mat-list>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="action-buttons">
+        <button mat-raised-button color="primary"
+                (click)="agregarAlCarrito()"
+                [disabled]="!canAdd(articulo)"
+                class="action-button">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Agregar al carrito
+        </button>
+
+        <button mat-raised-button color="accent"
+                (click)="comprarAhora()"
+                [disabled]="!canAdd(articulo)"
+                class="action-button">
+          <mat-icon>shopping_bag</mat-icon>
+          Comprar ahora
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Productos relacionados -->
+  <div class="related-products" *ngIf="articulosRelacionados.length > 0">
+    <h2>Productos relacionados</h2>
+    <div class="related-grid">
+      <mat-card *ngFor="let related of articulosRelacionados"
+                class="related-card"
+                (click)="verArticuloRelacionado(related)">
+        <img mat-card-image [src]="related.imagen || '/assets/images/no-image.png'" [alt]="related.nombre">
+
+        <mat-card-content>
+          <h4 class="related-title">{{ related.nombre }}</h4>
+          <p class="related-price">${{ related.precioUsuario | number:'1.2-2' }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- Loading indicator -->
+<div *ngIf="isLoading" class="loading">
+  <mat-icon class="spinning">refresh</mat-icon>
+  <span>Cargando producto...</span>
+</div>
+
+<!-- Error state -->
+<div *ngIf="!isLoading && !articulo" class="error-state">
+  <mat-icon>error_outline</mat-icon>
+  <h3>Producto no encontrado</h3>
+  <p>El producto que buscas no existe o no está disponible.</p>
+  <button mat-button (click)="volverALista()">
+    <mat-icon>arrow_back</mat-icon>
+    Volver a la tienda
+  </button>
+</div>

@@ -1,0 +1,196 @@
+<div class="ecommerce-container">
+  <!-- Header mejorado -->
+  <mat-toolbar color="primary" class="header">
+    <div class="brand-section">
+      <mat-icon class="brand-icon">auto_parts</mat-icon>
+      <span class="brand-title">AutoParts</span>
+    </div>
+    
+    <span class="spacer"></span>
+
+    <!-- Buscador mejorado -->
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <input matInput
+               placeholder="Buscar repuestos, marcas, modelos..."
+               [(ngModel)]="terminoBusqueda"
+               (keyup.enter)="buscar()"
+               class="search-input">
+        <button mat-icon-button 
+                matSuffix 
+                (click)="buscar()" 
+                class="search-button"
+                [disabled]="!terminoBusqueda.trim()">
+          <mat-icon class="search-icon">search</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <!-- Carrito mejorado -->
+    <button mat-raised-button class="cart-button" (click)="goToCart()">
+      <mat-icon>shopping_cart</mat-icon>
+      <span class="cart-text">Carrito</span>
+      <span class="cart-badge" *ngIf="getCantidadCarrito() > 0">{{ getCantidadCarrito() }}</span>
+    </button>
+
+    <!-- Menú de usuario -->
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="goToProfile()">
+        <mat-icon>person</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+      <button mat-menu-item (click)="goToOrders()">
+        <mat-icon>receipt</mat-icon>
+        <span>Mis Pedidos</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar sesión</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar>
+
+  <div class="main-content">
+    <!-- Sidebar con categorías -->
+    <mat-sidenav-container class="sidenav-container">
+      <mat-sidenav mode="side" opened class="sidebar">
+        <mat-nav-list>
+          <h3 mat-subheader>Categorías</h3>
+
+          <!-- Todas las categorías -->
+          <mat-list-item (click)="onCategoriaChange(null)" [class.active]="categoriaSeleccionada === null">
+            <mat-icon mat-list-icon>category</mat-icon>
+            <span>Todas las categorías</span>
+          </mat-list-item>
+
+          <!-- Categorías con subcategorías -->
+          <mat-accordion>
+            <mat-expansion-panel *ngFor="let categoria of categorias">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>{{ getCategoriaIcon(categoria.nombre) }}</mat-icon>
+                  {{ categoria.nombre }}
+                </mat-panel-title>
+                <mat-panel-description>
+                  {{ categoria.cantidadArticulos }} productos
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <!-- Subcategorías -->
+              <mat-list-item *ngFor="let subcategoria of getSubcategoriasByCategoria(categoria.id)"
+                           (click)="onSubcategoriaChange(subcategoria.id)"
+                           [class.active]="subcategoriaSeleccionada === subcategoria.id">
+                <mat-icon mat-list-icon>subdirectory_arrow_right</mat-icon>
+                <span>{{ subcategoria.nombre }}</span>
+                <span class="subcategory-count">{{ subcategoria.cantidadArticulos }}</span>
+              </mat-list-item>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </mat-nav-list>
+
+        <!-- Filtros adicionales -->
+        <div class="filters-section">
+          <h3 mat-subheader>Filtros</h3>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Precio mínimo</mat-label>
+            <input matInput type="number" [(ngModel)]="precioMin" (change)="buscar()">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Precio máximo</mat-label>
+            <input matInput type="number" [(ngModel)]="precioMax" (change)="buscar()">
+          </mat-form-field>
+
+          <mat-checkbox [(ngModel)]="soloConStock" (change)="buscar()">
+            Solo productos con stock
+          </mat-checkbox>
+
+          <button mat-stroked-button color="primary" (click)="limpiarFiltros()" class="clear-filters">
+            Limpiar filtros
+          </button>
+
+          <button mat-raised-button color="primary" (click)="aplicarFiltros()" class="apply-filters">
+            <mat-icon>filter_list</mat-icon>
+            Filtrar
+          </button>
+        </div>
+      </mat-sidenav>
+
+      <!-- Contenido principal -->
+      <div class="content-area">
+        <!-- Resultados de búsqueda -->
+        <div class="search-results" *ngIf="terminoBusqueda || categoriaSeleccionada || subcategoriaSeleccionada">
+          <p class="results-info">
+            {{ totalArticulos }} productos encontrados
+            <span *ngIf="terminoBusqueda">para "{{ terminoBusqueda }}"</span>
+            <span *ngIf="categoriaSeleccionada">en categoría seleccionada</span>
+            <span *ngIf="subcategoriaSeleccionada">en subcategoría seleccionada</span>
+          </p>
+        </div>
+
+        <!-- Loading indicator -->
+        <div *ngIf="isLoading" class="loading">
+          <mat-icon class="spinning">refresh</mat-icon>
+          <span>Cargando productos...</span>
+        </div>
+
+        <!-- Grid de productos -->
+        <div class="products-grid" *ngIf="!isLoading">
+          <mat-card *ngFor="let articulo of articulos" class="product-card" (click)="verDetalleArticulo(articulo)">
+            <img mat-card-image 
+                 [src]="articulo.imagen || 'assets/images/no-image.svg'" 
+                 [alt]="articulo.nombre"
+                 (error)="onImageError($event)"
+                 class="product-image">
+
+            <mat-card-content>
+              <h3 class="product-title">{{ articulo.nombre }}</h3>
+              <p class="product-code">Código: {{ articulo.codigoArticulo }}</p>
+
+              <div class="price-info">
+                <span class="user-price">${{ articulo.precioUsuario | number:'1.2-2' }}</span>
+                <span class="workshop-price" *ngIf="articulo.precioTaller !== articulo.precioUsuario">
+                  Taller: ${{ articulo.precioTaller | number:'1.2-2' }}
+                </span>
+              </div>
+
+              <div class="stock-info" [class.low-stock]="articulo.stock > 0 && articulo.stock <= 5">
+                <mat-icon>{{ articulo.stock > 0 ? 'inventory' : 'report_problem' }}</mat-icon>
+                <span>{{ articulo.stock > 0 ? articulo.stock + ' en stock' : 'Sin stock' }}</span>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-button color="primary" (click)="agregarAlCarrito(articulo); $event.stopPropagation()" [disabled]="!canAdd(articulo)">
+                <mat-icon>add_shopping_cart</mat-icon>
+                {{ canAdd(articulo) ? 'Agregar al carrito' : (articulo.stock > 0 ? 'Máximo en carrito' : 'Sin stock') }}
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+
+        <!-- Sin productos -->
+        <div *ngIf="!isLoading && articulos.length === 0" class="no-products">
+          <mat-icon>search_off</mat-icon>
+          <h3>No se encontraron productos</h3>
+          <p>Intenta con otros términos de búsqueda o filtros</p>
+        </div>
+
+        <!-- Paginación -->
+        <mat-paginator
+          *ngIf="totalArticulos > tamanoPagina"
+          [length]="totalArticulos"
+          [pageSize]="tamanoPagina"
+          [pageSizeOptions]="[6, 12, 24, 48]"
+          (page)="onPage($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </mat-sidenav-container>
+  </div>
+</div>

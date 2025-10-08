@@ -1,0 +1,65 @@
+<div class="home-container">
+  <div class="background-overlay"></div>
+  
+  <div class="content-wrapper">
+    <!-- Lado izquierdo - Información del ecommerce -->
+    <div class="left-section">
+      <div class="brand-content">
+        <h1 class="brand-title">AutoParts</h1>
+        <p class="brand-subtitle">Tu plataforma de confianza para repuestos automotrices</p>
+        <div class="brand-features">
+          <div class="feature">
+            <mat-icon class="feature-icon">directions_car</mat-icon>
+            <span>Repuestos originales</span>
+          </div>
+          <div class="feature">
+            <mat-icon class="feature-icon">flash_on</mat-icon>
+            <span>Entrega rápida</span>
+          </div>
+          <div class="feature">
+            <mat-icon class="feature-icon">build</mat-icon>
+            <span>Talleres certificados</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lado derecho - Card de login -->
+    <div class="right-section">
+      <mat-card class="login-card">
+        <mat-card-header class="centered-header">
+          <mat-card-title class="login-title">Bienvenido</mat-card-title>
+          <mat-card-subtitle class="login-subtitle">Accede a tu cuenta para continuar</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="login-section">
+            <button 
+              mat-stroked-button 
+              color="primary" 
+              type="button"
+              class="login-button"
+              (click)="goToLogin()"
+            >
+              Iniciar sesión
+            </button>
+          </div>
+
+          <mat-divider class="divider"></mat-divider>
+
+          <div class="register-section">
+            <button 
+              mat-stroked-button 
+              color="primary" 
+              type="button"
+              class="register-button"
+              (click)="goToRegister()"
+            >
+              Registrarse
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

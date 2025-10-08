@@ -1,0 +1,307 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header class="centered-header">
+      <mat-card-title class="register-title">Crear Cuenta</mat-card-title>
+      <mat-card-subtitle class="register-subtitle">Únete a nuestra plataforma</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+        <!-- Tipo de usuario -->
+        <div class="user-type-section">
+          <label class="section-label">¿Cómo te quieres registrar?</label>
+          <mat-radio-group formControlName="userType" class="user-type-group">
+            <mat-radio-button value="user" class="user-type-option">
+              <div class="radio-content">
+                <mat-icon>person</mat-icon>
+                <span>Cliente</span>
+                <small>Comprar repuestos</small>
+              </div>
+            </mat-radio-button>
+            <mat-radio-button value="workshop" class="user-type-option">
+              <div class="radio-content">
+                <mat-icon>build</mat-icon>
+                <span>Taller</span>
+                <small>Vender servicios</small>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <!-- Formulario para Usuario Normal -->
+        <div *ngIf="!isWorkshop" class="user-fields">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Nombre</mat-label>
+              <input 
+                matInput 
+                formControlName="firstName" 
+                placeholder="Tu nombre"
+                autocomplete="given-name"
+              />
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
+                {{ getErrorMessage('firstName') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Apellido</mat-label>
+              <input 
+                matInput 
+                formControlName="lastName" 
+                placeholder="Tu apellido"
+                autocomplete="family-name"
+              />
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
+                {{ getErrorMessage('lastName') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Correo electrónico</mat-label>
+              <input 
+                matInput 
+                type="email" 
+                formControlName="email" 
+                placeholder="tu@email.com"
+                autocomplete="email"
+              />
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+                {{ getErrorMessage('email') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Teléfono (opcional)</mat-label>
+              <input 
+                matInput 
+                type="tel" 
+                formControlName="phone" 
+                placeholder="+1234567890"
+                autocomplete="tel"
+              />
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Domicilio</mat-label>
+            <input 
+              matInput 
+              formControlName="address" 
+              placeholder="Tu dirección completa"
+              autocomplete="street-address"
+            />
+            <mat-icon matSuffix>home</mat-icon>
+            <mat-error *ngIf="registerForm.get('address')?.invalid && registerForm.get('address')?.touched">
+              {{ getErrorMessage('address') }}
+            </mat-error>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Contraseña</mat-label>
+              <input 
+                matInput 
+                [type]="hidePassword ? 'password' : 'text'" 
+                formControlName="password" 
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <button 
+                mat-icon-button 
+                matSuffix 
+                (click)="hidePassword = !hidePassword" 
+                [attr.aria-label]="'Hide password'" 
+                [attr.aria-pressed]="hidePassword"
+                type="button"
+              >
+                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+              <mat-error *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                {{ getErrorMessage('password') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Confirmar contraseña</mat-label>
+              <input 
+                matInput 
+                [type]="hideConfirmPassword ? 'password' : 'text'" 
+                formControlName="confirmPassword" 
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <button 
+                mat-icon-button 
+                matSuffix 
+                (click)="hideConfirmPassword = !hideConfirmPassword" 
+                [attr.aria-label]="'Hide password'" 
+                [attr.aria-pressed]="hideConfirmPassword"
+                type="button"
+              >
+                <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+              <mat-error *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
+                {{ getErrorMessage('confirmPassword') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="error-message" *ngIf="registerForm.get('confirmPassword')?.value && !passwordsMatch()">
+            Las contraseñas no coinciden
+          </div>
+        </div>
+
+        <!-- Formulario para Taller -->
+        <div *ngIf="isWorkshop" class="workshop-fields">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nombre del taller</mat-label>
+            <input 
+              matInput 
+              formControlName="workshopName" 
+              placeholder="Nombre de tu taller"
+              autocomplete="organization"
+            />
+            <mat-icon matSuffix>business</mat-icon>
+            <mat-error *ngIf="registerForm.get('workshopName')?.invalid && registerForm.get('workshopName')?.touched">
+              {{ getErrorMessage('workshopName') }}
+            </mat-error>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Correo electrónico</mat-label>
+              <input 
+                matInput 
+                type="email" 
+                formControlName="workshopEmail" 
+                placeholder="taller@email.com"
+                autocomplete="email"
+              />
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="registerForm.get('workshopEmail')?.invalid && registerForm.get('workshopEmail')?.touched">
+                {{ getErrorMessage('workshopEmail') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Teléfono (opcional)</mat-label>
+              <input 
+                matInput 
+                type="tel" 
+                formControlName="workshopPhone" 
+                placeholder="+1234567890"
+                autocomplete="tel"
+              />
+              <mat-icon matSuffix>phone</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Domicilio del taller</mat-label>
+            <input 
+              matInput 
+              formControlName="workshopAddress" 
+              placeholder="Dirección del taller"
+              autocomplete="street-address"
+            />
+            <mat-icon matSuffix>location_on</mat-icon>
+            <mat-error *ngIf="registerForm.get('workshopAddress')?.invalid && registerForm.get('workshopAddress')?.touched">
+              {{ getErrorMessage('workshopAddress') }}
+            </mat-error>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Contraseña</mat-label>
+              <input 
+                matInput 
+                [type]="hideWorkshopPassword ? 'password' : 'text'" 
+                formControlName="workshopPassword" 
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <button 
+                mat-icon-button 
+                matSuffix 
+                (click)="hideWorkshopPassword = !hideWorkshopPassword" 
+                [attr.aria-label]="'Hide password'" 
+                [attr.aria-pressed]="hideWorkshopPassword"
+                type="button"
+              >
+                <mat-icon>{{hideWorkshopPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+              <mat-error *ngIf="registerForm.get('workshopPassword')?.invalid && registerForm.get('workshopPassword')?.touched">
+                {{ getErrorMessage('workshopPassword') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Confirmar contraseña</mat-label>
+              <input 
+                matInput 
+                [type]="hideWorkshopConfirmPassword ? 'password' : 'text'" 
+                formControlName="workshopConfirmPassword" 
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <button 
+                mat-icon-button 
+                matSuffix 
+                (click)="hideWorkshopConfirmPassword = !hideWorkshopConfirmPassword" 
+                [attr.aria-label]="'Hide password'" 
+                [attr.aria-pressed]="hideWorkshopConfirmPassword"
+                type="button"
+              >
+                <mat-icon>{{hideWorkshopConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+              <mat-error *ngIf="registerForm.get('workshopConfirmPassword')?.invalid && registerForm.get('workshopConfirmPassword')?.touched">
+                {{ getErrorMessage('workshopConfirmPassword') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="error-message" *ngIf="registerForm.get('workshopConfirmPassword')?.value && !passwordsMatch()">
+            Las contraseñas no coinciden
+          </div>
+        </div>
+
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit" 
+          class="register-button full-width"
+          [disabled]="registerForm.invalid || !passwordsMatch() || isLoading"
+        >
+          <mat-spinner 
+            diameter="20" 
+            *ngIf="isLoading"
+            class="spinner-margin"
+          ></mat-spinner>
+          <span *ngIf="!isLoading">Crear cuenta</span>
+        </button>
+
+        <mat-divider class="divider"></mat-divider>
+
+        <div class="login-section">
+          <p class="login-text">¿Ya tienes una cuenta?</p>
+          <button 
+            mat-stroked-button 
+            color="primary" 
+            type="button"
+            class="login-link-button"
+            (click)="goToLogin()"
+          >
+            Iniciar sesión
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

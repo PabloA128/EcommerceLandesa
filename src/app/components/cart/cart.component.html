@@ -1,0 +1,82 @@
+<div class="cart-container" *ngIf="items.length > 0; else emptyCart">
+  <div class="cart-header">
+    <h1>Tu carrito</h1>
+    <span class="cart-count">{{ items.length }} {{ items.length === 1 ? 'artículo' : 'artículos' }}</span>
+  </div>
+
+  <div class="cart-content">
+    <div class="cart-list">
+      <mat-card class="cart-item" *ngFor="let item of items">
+        <div class="item-image">
+          <img [src]="item.articulo.imagen || 'assets/images/no-image.svg'" [alt]="item.articulo.nombre" (error)="onImageError($event)" />
+        </div>
+        <div class="item-info">
+          <h3 class="item-title">{{ item.articulo.nombre }}</h3>
+          <p class="code">Código: {{ item.articulo.codigoArticulo }}</p>
+          <div class="price">
+            <span class="label">Precio</span>
+            <span class="value">${{ item.articulo.precioUsuario | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        <div class="item-actions">
+          <div class="quantity">
+            <button mat-mini-fab color="primary" (click)="decrease(item)" aria-label="Disminuir">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="qty">{{ item.quantity }}</span>
+            <button mat-mini-fab color="primary" (click)="increase(item)" aria-label="Aumentar">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <div class="subtotal">
+            <span>Subtotal</span>
+            <strong>${{ (item.articulo.precioUsuario * item.quantity) | number:'1.2-2' }}</strong>
+          </div>
+          <button mat-stroked-button color="warn" (click)="remove(item)" class="remove-btn">
+            <mat-icon>delete</mat-icon>
+            Eliminar
+          </button>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="cart-summary">
+      <mat-card class="summary-card">
+        <h3 class="summary-title">Resumen</h3>
+        <div class="summary-row">
+          <span>Total artículos</span>
+          <span>{{ items.length }}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total a pagar</span>
+          <span class="total-value">${{ getTotal() | number:'1.2-2' }}</span>
+        </div>
+        <div class="actions">
+          <button mat-stroked-button (click)="seguirComprando()" class="keep-shopping">
+            <mat-icon>arrow_back</mat-icon>
+            Seguir comprando
+          </button>
+          <button mat-button color="warn" (click)="clear()" class="clear-cart">
+            <mat-icon>clear_all</mat-icon>
+            Vaciar carrito
+          </button>
+          <button mat-raised-button color="primary" (click)="checkout()" class="checkout-btn">
+            <mat-icon>shopping_bag</mat-icon>
+            Ir a pagar
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<ng-template #emptyCart>
+  <div class="empty">
+    <mat-icon>shopping_cart</mat-icon>
+    <h2>Tu carrito está vacío</h2>
+    <p>Agrega productos desde la tienda</p>
+    <button mat-raised-button color="primary" (click)="seguirComprando()">
+      Ir a la tienda
+    </button>
+  </div>
+</ng-template>
