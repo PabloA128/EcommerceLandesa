@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request)
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, request)
       .pipe(
         tap(response => {
           if (response.success && response.token && response.user) {
@@ -86,7 +86,7 @@ export class AuthService {
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request)
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, request)
       .pipe(
         tap(response => {
           if (response.success && response.token && response.user) {
@@ -97,15 +97,15 @@ export class AuthService {
   }
 
   forgotPassword(request: ForgotPasswordRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/forgot-password`, request);
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/forgot-password`, request);
   }
 
   resetPassword(request: ResetPasswordRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/reset-password`, request);
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/reset-password`, request);
   }
 
   checkEmailAvailability(email: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiUrl}/check-email?email=${encodeURIComponent(email)}`);
+    return this.http.get<boolean>(`${this.apiUrl}/auth/check-email?email=${encodeURIComponent(email)}`);
   }
 
   logout(): void {
@@ -127,7 +127,7 @@ export class AuthService {
   }
 
   updateProfile(profileData: any): Observable<AuthResponse> {
-    return this.http.put<AuthResponse>(`${this.apiUrl}/update-profile`, profileData)
+    return this.http.put<AuthResponse>(`${this.apiUrl}/auth/update-profile`, profileData)
       .pipe(
         tap(response => {
           if (response.success && response.user) {
